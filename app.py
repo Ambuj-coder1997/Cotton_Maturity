@@ -23,9 +23,13 @@ def preprocess_image(image):
     return image.astype(np.float32)
 
 # Decode YOLO Output (Fixed)
-def decode_yolo_output(output, image_shape, conf_threshold=0.5):
+def decode_yolo_output(output, conf_threshold=0.3):  # Lowered threshold to 0.3
     boxes, scores, class_ids = [], [], []
     output = np.squeeze(output)  # Remove batch dimension if necessary
+
+    st.write("Raw Model Output (Debugging):")
+    for i, det in enumerate(output):
+        st.write(f"Detection {i}: {det}")
 
     for det in output:
         confidence = det[4]  # Confidence score
@@ -33,16 +37,17 @@ def decode_yolo_output(output, image_shape, conf_threshold=0.5):
             continue
 
         x, y, w, h = det[:4]  # Bounding box
-        class_id = int(det[5]) if len(det) > 5 else -1  # Avoid out-of-range error
+        class_probs = det[5:]  # Class scores (YOLOv8 format)
+        class_id = np.argmax(class_probs)  # Get class with highest probability
 
         if class_id < 0 or class_id >= len(CLASSES):  # Ensure valid class ID
             continue
 
-        # Convert YOLO format to (x1, y1, x2, y2)
-        x1 = max(0, int((x - w / 2) * image_shape[0]))
-        y1 = max(0, int((y - h / 2) * image_shape[1]))
-        x2 = min(image_shape[0], int((x + w / 2) * image_shape[0]))
-        y2 = min(image_shape[1], int((y + h / 2) * image_shape[1]))
+        # Convert YOLO format to (x1, y1, x2, y2) using 640 instead of image_shape
+        x1 = max(0, int((x - w / 2) * 640))
+        y1 = max(0, int((y - h / 2) * 640))
+        x2 = min(640, int((x + w / 2) * 640))
+        y2 = min(640, int((y + h / 2) * 640))
 
         boxes.append([x1, y1, x2, y2])
         scores.append(float(confidence))
@@ -82,8 +87,7 @@ if uploaded_file:
     outputs = session.run(None, {"images": input_tensor})
 
     # Decode YOLO Output
-    image_shape = image.size  # (width, height)
-    boxes, scores, class_ids = decode_yolo_output(outputs[0], image_shape)
+    boxes, scores, class_ids = decode_yolo_output(outputs[0])
 
     # Debugging Output
     st.write(f"Model Output Shape: {outputs[0].shape}")
