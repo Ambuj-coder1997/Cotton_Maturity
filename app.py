@@ -25,7 +25,7 @@ def preprocess_image(image):
 # Decode YOLO Output
 def decode_yolo_output(output, image_shape, conf_threshold=0.5):
     boxes, scores, class_ids = [], [], []
-    output = np.squeeze(output)  # Remove batch dimension
+    output = np.squeeze(output)  # Remove batch dimension if necessary
 
     for det in output:
         confidence = det[4]  # Confidence score
@@ -63,7 +63,7 @@ uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg
 
 if uploaded_file:
     image = Image.open(uploaded_file)
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+    st.image(image, caption="Uploaded Image", use_container_width=True)  # Fixed deprecation warning
     
     # Preprocess & Predict
     input_tensor = preprocess_image(image)
@@ -72,21 +72,18 @@ if uploaded_file:
     # Run Model
     outputs = session.run(None, {"images": input_tensor})
 
-    # Debugging Output
-    st.write(f"Model Output Shape: {outputs[0].shape}")
-
-    st.write(f"Boxes: {boxes}, Scores: {scores}, Class IDs: {class_ids}")
-    st.write(f"Model Output Shape: {outputs[0].shape}")
-    st.write(f"Number of Classes: {len(CLASSES)}")
-
-    
     # Decode YOLO Output
     image_shape = image.size  # (width, height)
     boxes, scores, class_ids = decode_yolo_output(outputs[0], image_shape)
 
+    # Debugging Output (Now after decoding)
+    st.write(f"Model Output Shape: {outputs[0].shape}")
+    st.write(f"Boxes: {boxes}, Scores: {scores}, Class IDs: {class_ids}")
+    st.write(f"Number of Classes: {len(CLASSES)}")
+
     # Draw Bounding Boxes
     detected_image = draw_boxes(image, boxes, scores, class_ids)
-    st.image(detected_image, caption="Detected Objects", use_column_width=True)
+    st.image(detected_image, caption="Detected Objects", use_container_width=True)
 
     # Display Predictions
     for i, class_id in enumerate(class_ids):
