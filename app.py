@@ -28,8 +28,7 @@ output_details = interpreter.get_output_details()
 input_shape = input_details[0]['shape']
 st.write(f"Model Expected Input Shape: {input_shape}")  # Debugging step
 
-# Preprocess the image
-input_tensor = preprocess_image(image)
+
 
 # Define Classes
 CLASSES = ["Cotton Blossom", "Cotton Bud", "Early Boll", "Matured Cotton Boll", "Split Cotton Boll"]
@@ -40,6 +39,9 @@ def preprocess_image(image):
     image = np.array(image, dtype=np.float32) / 255.0  # Normalize if required
     image = np.expand_dims(image, axis=0)  # Add batch dimension
     return image
+
+# Preprocess the image
+input_tensor = preprocess_image(image)
 
 # Streamlit UI
 st.title("Cotton Growth Stage Classifier 🌱")
