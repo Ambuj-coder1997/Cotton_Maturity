@@ -16,6 +16,21 @@ interpreter = load_model()
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
+# Load TFLite model
+interpreter = tf.lite.Interpreter(model_path="model.tflite")
+interpreter.allocate_tensors()
+
+# Get input and output details
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
+
+# Debugging: Print expected input shape
+input_shape = input_details[0]['shape']
+st.write(f"Model Expected Input Shape: {input_shape}")  # Debugging step
+
+# Preprocess the image
+input_tensor = preprocess_image(image)
+
 # Define Classes
 CLASSES = ["Cotton Blossom", "Cotton Bud", "Early Boll", "Matured Cotton Boll", "Split Cotton Boll"]
 
