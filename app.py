@@ -74,6 +74,11 @@ if uploaded_file:
 
     # Debugging Output
     st.write(f"Model Output Shape: {outputs[0].shape}")
+
+    st.write(f"Boxes: {boxes}, Scores: {scores}, Class IDs: {class_ids}")
+    st.write(f"Model Output Shape: {outputs[0].shape}")
+    st.write(f"Number of Classes: {len(CLASSES)}")
+
     
     # Decode YOLO Output
     image_shape = image.size  # (width, height)
